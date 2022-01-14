@@ -1,0 +1,13 @@
+{
+  "name": "userregistration",
+  "version": "1.0.0",
+  "description": "create and maintain user Profiles",
+  "main": "userRegistration.js",
+  "scripts": { "start" : "node digitalTwin.js" },
+  "engineStrict": true,
+  "dependencies": {
+    "fabric-shim": "2.2.1"
+  },
+  "author": "akuma254@asu.edu",
+  "license": "ISC"
+}
