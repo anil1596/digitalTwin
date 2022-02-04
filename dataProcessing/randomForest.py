@@ -10,6 +10,8 @@ import matplotlib.pyplot as plt
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.naive_bayes import GaussianNB
 import seaborn as sns
+import joblib
+import pickle
 from sklearn.preprocessing import StandardScaler
 from sklearn.decomposition import PCA
 from sklearn.ensemble import BaggingClassifier
@@ -73,7 +75,7 @@ train_features, test_features, train_labels, test_labels = train_test_split(scal
 rf = RandomForestClassifier(n_estimators=1000)
 rf.fit(train_features, train_labels)
 print('Accuracy with RF:\t', accuracy_score(test_labels, rf.predict(test_features)))
-
+joblib.dump(rf, 'models/rfModel.pkl')
 #Decision Tree Classifier
 from sklearn.tree import DecisionTreeClassifier
 clf_gini = DecisionTreeClassifier(criterion = "gini", random_state = 100,max_depth=3, min_samples_leaf=5)

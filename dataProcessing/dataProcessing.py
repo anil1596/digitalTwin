@@ -4,12 +4,12 @@ import connection
 
 print('Downloading Historical Data for ')
 # data = connection.getHistoricalData()
-data = json.load(open('data.txt', 'r'))
+data = json.load(open('Dynamic_Data.json', 'r'))
 if data == 'Error':
     print('Some Error in data Fetching')
     
 logFile = open('params.log', 'w')
-# print("Start Processing Data: ", len(data["response"]["Record"]))
+print("Start Processing Data: ", len(data["response"]["Record"]))
 state = ['Fan on Not Moving', 'idle', 'Fan off Moving', 'Fan on Moving']
 
 p1 = "tcpConnections" + ',' + "dnsSize"
@@ -17,12 +17,21 @@ p2 = "totalTasks" + ',' + "runningTasks" + ',' + "sleepingTasks" + ',' + "stoppe
 p3 = "totalMemory" + ',' + "freeMemory" + ',' + "usedMemory" + ',' + "bufferCache"
 p4 = "totalSwap" + ',' + "freeSwap" + ',' + "usedSwap" + ',' + "availableMemory"
 p5 = "deviceState"
-logFile.write(p1 + ',' + p2 + ',' + p3 + ',' + p4 + ',' + p5 + '\n')
+p6_list=[]
+SAR=json.loads(data['response']['Record'][-1]["Value"]["dynamicParams"].replace("'", "\""))['System Activity Report']
+for item, vals in SAR.items():
+    if type(vals)==dict:
+        for key,val in vals.items():
+            p6_list.append(item+'_'+key)
+            
+p7 = "GPIO output"
+logFile.write(p1 + ',' + p2 + ',' + p3 + ',' + p4 + ',' + p5 + ',' + ','.join(p6_list) + p7 +'\n')
 
 
-for index, val in enumerate(data["response"]["Record"]):
+for index, val in enumerate(data):
     try:
-        dynamicParams = json.loads(str(val["Value"]["dynamicParams"]).replace("'", "\""))
+        # dynamicParams = json.loads(str(val["Value"]["dynamicParams"]).replace("'", "\""))
+        dynamicParams = json.loads(str(val).replace("'", "\""))
         
         #TCP connections
         tcpConnections = str(len(dynamicParams["TCP"]["TCP"]))
@@ -55,8 +64,21 @@ for index, val in enumerate(data["response"]["Record"]):
         deviceState = dynamicParams["State"]
         p5 = str(state.index(deviceState))
         
+        #System Activity Report
+        p6_values=[]
+        SAR=dynamicParams['System Activity Report']        
+        if SAR:
+            for key in p6_list:                
+                if '_' in key:
+                    header,item=key.split('_')                    
+                    value=SAR[header][item]                    
+                    p6_values.append(value)                    
+        
+        gpioOP = dynamicParams["GPIO Pin Output"]
+        p7 = gpioOP
+        
         # print(p1 + ',' + p2 + ',' + p3 + ',' + p4 + ',' + p5 + '\n')
-        logFile.write(p1 + ',' + p2 + ',' + p3 + ',' + p4 + ',' + p5 + '\n')
+        logFile.write(p1 + ',' + p2 + ',' + p3 + ',' + p4 + ',' + p5 + ',' + ','.join(p6_values) + p7 + '\n')
         
     except Exception as e:
         print('Something Wrong with Record: ', index)
